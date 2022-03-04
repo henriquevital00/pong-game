@@ -8,7 +8,7 @@
 
 #pragma once
 #include "SDL/SDL.h"
-#include <list>
+#include <vector>
 #include <string>
 
 using namespace std;
@@ -62,7 +62,7 @@ private:
 	Vector2 mPaddlePos;
 	
 	// Balls list
-	list<Ball> mBalls;
+	vector<Ball> mBalls;
 
 	int playerBoard;
 };
