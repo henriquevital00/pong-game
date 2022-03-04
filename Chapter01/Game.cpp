@@ -229,7 +229,7 @@ void Game::UpdateGame()
 			mBall.velocity.y *= -1;
 		}
 
-		// verifica se houve colisão com outras bolas e faz as bolas irem para direção opostas
+		// verifica se houve colisão com outras bolas e faz as bolas irem para direções opostas
 		for (auto& mBallAux : mBalls) {
 			if (mBall.position.x < mBallAux.position.x + thickness &&
 				mBall.position.x + thickness > mBallAux.position.x &&
