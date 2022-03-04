@@ -1,0 +1,18 @@
+﻿  Game.cpp
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(207,1): error C3688: sufixo literal inválido 's'; operador literal ou modelo de operador literal 'operator ""s' não encontrado
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(207,21): error C2143: erro de sintaxe: ')' ausente antes de 'constante'
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(209,20): error C2059: erro de sintaxe: ')'
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(211,22): error C2059: erro de sintaxe: ';'
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(217,2): error C2059: erro de sintaxe: 'else'
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(218,2): error C2143: erro de sintaxe: ';' ausente antes de '{'
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(218,2): error C2447: '{': faltando cabeçalho de função (lista formal de estilo antigo?)
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(231,2): error C2059: erro de sintaxe: 'if'
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(232,2): error C2143: erro de sintaxe: ';' ausente antes de '{'
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(232,2): error C2447: '{': faltando cabeçalho de função (lista formal de estilo antigo?)
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(238,2): error C2059: erro de sintaxe: 'else'
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(240,2): error C2143: erro de sintaxe: ';' ausente antes de '{'
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(240,2): error C2447: '{': faltando cabeçalho de função (lista formal de estilo antigo?)
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(245,1): error C2059: erro de sintaxe: '}'
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(245,1): error C2143: erro de sintaxe: ';' ausente antes de '}'
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(249,1): error C2143: erro de sintaxe: ';' ausente antes de '{'
+C:\Users\unifhcarvalho\Downloads\Lab 1\Chapter01\Game.cpp(249,1): error C2447: '{': faltando cabeçalho de função (lista formal de estilo antigo?)
