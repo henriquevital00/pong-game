@@ -59,7 +59,11 @@ bool Game::Initialize()
 		SDL_Log("Failed to create renderer: %s", SDL_GetError());
 		return false;
 	}
+
+	Vector2 paddlePos = Vector2(10.0f, 768.0f/2.0f);
 	
+	this->paddle = Paddle(Vector2());
+
 	mPaddlePos.x = 10.0f;//posição inicial da raquete eixo x
 	mPaddlePos.y = 768.0f/2.0f;//posição inicial da raquee eixo y
 	mBallPos.x = 1024.0f/2.0f;//posição da bola eixo x
@@ -215,8 +219,8 @@ void Game::GenerateOutput()
 		mRenderer,
 		0,		// R
 		0,		// G 
-		255,	// B
-		255		// A
+		0,	// B
+		0		// A
 	);
 	
 	// limpa o back buffer
@@ -252,40 +256,12 @@ void Game::GenerateOutput()
 	wall.h = thickness;
 	SDL_RenderFillRect(mRenderer, &wall);
 	
-	//como as posições da raquete e da bola serão atualizadas a cada iteração do game loop, criamos "membros" na classe
-	//Game.h para tal
 
-	//mudar a cor da raquete
-	SDL_SetRenderDrawColor(mRenderer, 0, 255, 0, 255);
-
-	//desenhando a raquete - usando mPaddlePos que é uma struc de coordenada que foi definida em Game.h
-	// 
-	SDL_Rect paddle{
-		static_cast<int>(mPaddlePos.x),//static_cast converte de float para inteiros, pois SDL_Rect trabalha com inteiros
-		static_cast<int>(mPaddlePos.y - paddleH/2),
-		thickness,
-		static_cast<int>(paddleH)
-	};
-	SDL_RenderFillRect(mRenderer, &paddle);
-	
-
-	//desenhando a bola - usando mBallPos que é uma struc de coordenadas definida como membro em Game.h
-	
-	//mudar a cor do renderizador para a bola
-	SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);
-	// Draw ball
-	SDL_Rect ball{	
-		static_cast<int>(mBallPos.x - thickness/2),
-		static_cast<int>(mBallPos.y - thickness/2),
-		thickness,
-		thickness
-	};
-	SDL_RenderFillRect(mRenderer, &ball);
+	this->paddle.Draw(mRenderer);
+	this->ball.Draw(mRenderer);
 
 	SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);	
-
 	
-	// Swap front buffer and back buffer
 	SDL_RenderPresent(mRenderer);
 }
 
