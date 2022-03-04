@@ -76,16 +76,16 @@ bool Game::Initialize()
 		}
 	});
 
-		mBalls.push_back({
+	mBalls.push_back({
 		{
-			1200.0f, // Ball X-axis
+			1200.0f, // Ball X-axis			
 			540.0f / 2.0f  // Ball Y-axis
 		},
 		{
 			-200.0f, // velocidade de movimentação da bola no eixo x
 			500.0f // velocidade de movimentação da bola no eixo y
 		}
-		});
+	});
 
 	return true;
 }

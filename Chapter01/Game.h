@@ -9,8 +9,6 @@
 #pragma once
 #include "SDL/SDL.h"
 #include <list>
-#include <iostream>
-#include <sstream>
 #include <string>
 
 using namespace std;
