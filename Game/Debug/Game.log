@@ -1,0 +1,5 @@
+﻿  Game.cpp
+C:\Users\unifjsantos\Downloads\pong-game\Game.h(10,10): fatal error C1083: Não é possível abrir arquivo incluir: 'SDL/SDL.h': No such file or directory
+  Main.cpp
+C:\Users\unifjsantos\Downloads\pong-game\Game.h(10,10): fatal error C1083: Não é possível abrir arquivo incluir: 'SDL/SDL.h': No such file or directory
+  Gerando Código...
