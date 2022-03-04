@@ -14,7 +14,7 @@ const float paddleH = 100.0f;//tamanho da raquete
 
 Game::Game()
 :mWindow(nullptr)//para criar uma janela
-,mRenderer(nullptr)//para fins de renderizaÁ„o na tela
+,mRenderer(nullptr)//para fins de renderiza√ß√£o na tela
 ,mTicksCount(0)//para guardar o tempo decorrido no jogo
 ,mIsRunning(true)//verificar se o jogo ainda deve continuar sendo executado
 ,mPaddleDir(0)//direcao da bolinha
@@ -62,8 +62,8 @@ bool Game::Initialize()
 		return false;
 	}
 	
-	mPaddlePos.x = 10.0f; //posiÁ„o inicial da raquete eixo x
-	mPaddlePos.y = 768.0f/2.0f; //posiÁ„o inicial da raquee eixo y
+	mPaddlePos.x = 10.0f; //posi√ß√£o inicial da raquete eixo x
+	mPaddlePos.y = 768.0f/2.0f; //posi√ß√£o inicial da raquee eixo y
 
 	mBalls.push_back({
 		{
@@ -71,8 +71,8 @@ bool Game::Initialize()
 			540.0f / 2.0f  // Ball Y-axis
 		},
 		{
-			-200.0f, // velocidade de movimentaÁ„o da bola no eixo x
-			500.0f // velocidade de movimentaÁ„o da bola no eixo y
+			-200.0f, // velocidade de movimenta√ß√£o da bola no eixo x
+			500.0f // velocidade de movimenta√ß√£o da bola no eixo y
 		}
 	});
 
@@ -82,8 +82,8 @@ bool Game::Initialize()
 			540.0f / 2.0f  // Ball Y-axis
 		},
 		{
-			-200.0f, // velocidade de movimentaÁ„o da bola no eixo x
-			500.0f // velocidade de movimentaÁ„o da bola no eixo y
+			-200.0f, // velocidade de movimenta√ß√£o da bola no eixo x
+			500.0f // velocidade de movimenta√ß√£o da bola no eixo y
 		}
 	});
 
@@ -102,7 +102,7 @@ void Game::RunLoop()
 
 void Game::ProcessInput()
 {
-	SDL_Event event;//evento, inputs do jogador s„o armazenados aqui
+	SDL_Event event;//evento, inputs do jogador s√£o armazenados aqui
 	while (SDL_PollEvent(&event))
 	{
 		switch (event.type)
@@ -114,7 +114,7 @@ void Game::ProcessInput()
 		}
 	}
 	
-	// Get state of keyboard - podemos buscar por alguma tecla especÌfica pressionada no teclado, nesse caso, Escape
+	// Get state of keyboard - podemos buscar por alguma tecla espec√≠fica pressionada no teclado, nesse caso, Escape
 	const Uint8* state = SDL_GetKeyboardState(NULL);
 	// If escape is pressed, also end loop
 	if (state[SDL_SCANCODE_ESCAPE])
@@ -122,7 +122,7 @@ void Game::ProcessInput()
 		mIsRunning = false;
 	}
 	
-	// Update paddle direction based on W/S keys - atualize a direÁ„o da raquete com base na entrada do jogador
+	// Update paddle direction based on W/S keys - atualize a dire√ß√£o da raquete com base na entrada do jogador
 	// W -> move a raquete para cima, S -> move a raquete para baixo
 	mPaddleDir = 0;
 	if (state[SDL_SCANCODE_W])
@@ -137,28 +137,28 @@ void Game::ProcessInput()
 
 void Game::UpdateGame()
 {
-	// Espere que 16ms tenham passado desde o ˙ltimo frame - limitando os frames
+	// Espere que 16ms tenham passado desde o √∫ltimo frame - limitando os frames
 	while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16))
 		;
 
-	// Delta time È a diferenÁa em ticks do ˙ltimo frame
-	// (convertido pra segundos) - calcula o delta time para atualizaÁ„o do jogo
+	// Delta time √© a diferen√ßa em ticks do √∫ltimo frame
+	// (convertido pra segundos) - calcula o delta time para atualiza√ß√£o do jogo
 	float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;
 	
-	// "Clamp" (lima/limita) valor m·ximo de delta time
+	// "Clamp" (lima/limita) valor m√°ximo de delta time
 	if (deltaTime > 0.05f)
 	{
 		deltaTime = 0.05f;
 	}
 
-	// atualize a contagem de ticks par ao prÛximo frame
+	// atualize a contagem de ticks par ao pr√≥ximo frame
 	mTicksCount = SDL_GetTicks();
 	
-	// atualiza a posiÁ„o da raquete
+	// atualiza a posi√ß√£o da raquete
 	if (mPaddleDir != 0)
 	{
 		mPaddlePos.y += mPaddleDir * 300.0f * deltaTime;
-		// verifique que a raquete n„o se move para fora da tela - usamos "thickness", que definimos como a altura dos elementos
+		// verifique que a raquete n√£o se move para fora da tela - usamos "thickness", que definimos como a altura dos elementos
 		if (mPaddlePos.y < (paddleH/2.0f + thickness))
 		{
 			mPaddlePos.y = paddleH/2.0f + thickness;
@@ -170,22 +170,22 @@ void Game::UpdateGame()
 	}
 	
 	for (auto& mBall : mBalls) {
-		// atualiza a posiÁ„o da bola com base na sua velocidade
+		// atualiza a posi√ß√£o da bola com base na sua velocidade
 		mBall.position.x += mBall.velocity.x * deltaTime;
 		mBall.position.y += mBall.velocity.y * deltaTime;
 
-		// atualiza a posiÁ„o da bola se ela colidiu com a raquete
+		// atualiza a posi√ß√£o da bola se ela colidiu com a raquete
 		float diff = mPaddlePos.y - mBall.position.y;
-		//pegue o valor absoluto de diferenÁa entre o eixo y da bolinha e da raquete
-		//isso È necess·rio para os casos em que no prÛximo frame a bolinha ainda n„o esteja t„o distante da raquete
-		//verifica se a bola est· na area da raquete e na mesma posiÁ„o no eixo x
+		//pegue o valor absoluto de diferen√ßa entre o eixo y da bolinha e da raquete
+		//isso √© necess√°rio para os casos em que no pr√≥ximo frame a bolinha ainda n√£o esteja t√£o distante da raquete
+		//verifica se a bola est√° na area da raquete e na mesma posi√ß√£o no eixo x
 		diff = (diff > 0.0f) ? diff : -diff;
 		if (
-			// A diferenÁa no eixo y y-difference is small enough
+			// A diferen√ßa no eixo y y-difference is small enough
 			diff <= paddleH / 2.0f &&
 			// Estamos na posicao x correta
 			mBall.position.x <= 25.0f && mBall.position.x >= 20.0f &&
-			// A bolinha est· se movendo para a esquerda
+			// A bolinha est√° se movendo para a esquerda
 			mBall.velocity.x < 0.0f)
 		{
 			mBall.velocity.x *= -1.0f;
@@ -196,7 +196,7 @@ void Game::UpdateGame()
 			#pragma endregion score board
 		}
 
-		//Verifica se a bola saiu da tela (no lado esquerdo, onde È permitido)
+		//Verifica se a bola saiu da tela (no lado esquerdo, onde √© permitido)
 		//Se sim, encerra o jogo
 		// 
 		else if (mBall.position.x <= 0.0f)
@@ -212,14 +212,14 @@ void Game::UpdateGame()
 			mBall.velocity.x *= -1.0f;
 		}
 
-		// Atualize (negative) a posiÁ„o da bola se ela colidir com a parede de cima
+		// Atualize (negative) a posi√ß√£o da bola se ela colidir com a parede de cima
 		// 
 		if (mBall.position.y <= thickness && mBall.velocity.y < 0.0f)
 		{
 			mBall.velocity.y *= -1;
 		}
 
-		// Atualize (negative) a posiÁ„o da bola se ela colidiu com a parede de baixo
+		// Atualize (negative) a posi√ß√£o da bola se ela colidiu com a parede de baixo
 		// Did the ball collide with the bottom wall?
 		else if (mBall.position.y >= (768 - thickness) &&
 			mBall.velocity.y > 0.0f)
@@ -227,13 +227,13 @@ void Game::UpdateGame()
 			mBall.velocity.y *= -1;
 		}
 
-		// verifica se houve colis„o com outras bolas
+		// verifica se houve colis√£o com outras bolas e faz as bolas irem para dire√ß√£o opostas
 		for (auto& mBallAux : mBalls) {
 			if (mBall.position.x < mBallAux.position.x + thickness &&
 				mBall.position.x + thickness > mBallAux.position.x &&
 				mBall.position.y < mBallAux.position.y + thickness &&
 				mBall.position.y + thickness > mBallAux.position.y
-				)
+			)
 			{
 				mBall.velocity.x *= -1;
 				mBallAux.velocity.x *= -1;
@@ -288,13 +288,13 @@ void Game::GenerateOutput()
 	wall.h = thickness;
 	SDL_RenderFillRect(mRenderer, &wall);
 	
-	//como as posiÁıes da raquete e da bola ser„o atualizadas a cada iteraÁ„o do game loop, criamos "membros" na classe
+	//como as posi√ß√µes da raquete e da bola ser√£o atualizadas a cada itera√ß√£o do game loop, criamos "membros" na classe
 	//Game.h para tal
 
 	//mudar a cor da raquete
 	SDL_SetRenderDrawColor(mRenderer, 0, 255, 0, 255);
 
-	//desenhando a raquete - usando mPaddlePos que È uma struc de coordenada que foi definida em Game.h
+	//desenhando a raquete - usando mPaddlePos que √© uma struc de coordenada que foi definida em Game.h
 	// 
 	SDL_Rect paddle{
 		static_cast<int>(mPaddlePos.x),//static_cast converte de float para inteiros, pois SDL_Rect trabalha com inteiros
@@ -305,7 +305,7 @@ void Game::GenerateOutput()
 	SDL_RenderFillRect(mRenderer, &paddle);
 	
 	for (auto& mBall : mBalls) {
-		//desenhando a bola - usando mBallPos que È uma struc de coordenadas definida como membro em Game.h
+		//desenhando a bola - usando mBallPos que √© uma struc de coordenadas definida como membro em Game.h
 
 		//mudar a cor do renderizador para a bola
 		SDL_SetRenderDrawColor(mRenderer, 255, 255, 0, 255);
