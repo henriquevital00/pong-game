@@ -82,6 +82,28 @@ bool Game::Initialize()
 	return true;
 }
 
+bool Game::loadBackground()
+{
+	bool success = true;
+
+	gHelloWorld = SDL_LoadBMP("menu.bmp");
+	if (gHelloWorld == NULL)
+	{
+		SDL_Log("Unable to load image %s! SDL Error: %s\n", "hello_world.bmp", SDL_GetError());
+		success = false;
+	}
+	gScreenSurface = SDL_GetWindowSurface(mWindow);
+	SDL_BlitSurface(gHelloWorld, NULL, gScreenSurface, NULL);
+	texture1 = SDL_CreateTextureFromSurface(mRenderer, gHelloWorld);
+
+	SDL_RenderCopy(mRenderer, texture1, NULL, NULL);
+	SDL_RenderPresent(mRenderer);
+
+	SDL_UpdateWindowSurface(mWindow);
+	//SDL_Delay(2000);
+	return success;
+}
+
 void Game::RunLoop()
 {
 	while (mIsRunning)
@@ -232,7 +254,7 @@ void Game::UpdateGame()
 		// 
 		else if (mBall.position.x <= 0.0f)
 		{
-			// mIsRunning = false;
+			mIsRunning = false;
 			mBall.velocity.x *= -1.0f;
 		}
 
@@ -277,17 +299,16 @@ void Game::UpdateGame()
 //Desenhando a tela do jogo
 void Game::GenerateOutput()
 {
-	// Setamos a cor de fundo par azul
-	SDL_SetRenderDrawColor(
-		mRenderer,
-		0,		// R
-		0,		// G 
-		255,	// B
-		255		// A
-	);
+	SDL_Surface* surface = SDL_LoadBMP("campo.bmp");
+	SDL_Texture* texture = SDL_CreateTextureFromSurface(mRenderer, surface);
+
+	SDL_FreeSurface(surface);
 
 	// limpa o back buffer
+	//SDL_SetRenderDrawColor(renderer, 0xff000000, 0x00ff0000, 0x0000ff00, 0x000000ff);
+	SDL_SetRenderDrawColor(mRenderer, 0x00, 0x00, 0x00, 0x00);
 	SDL_RenderClear(mRenderer);
+	SDL_RenderCopy(mRenderer, texture, NULL, NULL);
 
 	// Desenha as paredes - mudamos a cor de mRenderer para o desenho dos retangulos que formaram as paredes
 	SDL_SetRenderDrawColor(mRenderer, 255, 0, 255, 255);

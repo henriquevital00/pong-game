@@ -33,6 +33,7 @@ enum class GameState { StartScreen, Playing };
 
 enum class GameMode { SinglePlayer, MultiPlayer, IA };
 
+
 // Game class
 class Game
 {
@@ -40,6 +41,8 @@ public:
 	Game();
 	// Initialize the game
 	bool Initialize();
+	// Coloca um papel de parede bonito
+	bool loadBackground();
 	// Runs the game loop until the game is over
 	void RunLoop();
 	// Shutdown the game
@@ -52,6 +55,16 @@ private:
 
 	// Window created by SDL
 	SDL_Window* mWindow;
+
+
+	//The surface contained by the window
+	SDL_Surface* gScreenSurface = NULL;
+
+	//The image we will load and show on the screen
+	SDL_Surface* gHelloWorld = NULL;
+
+	SDL_Texture* texture1;
+
 	// Renderer for 2D drawing
 	SDL_Renderer* mRenderer;
 	// Number of ticks since start of game
