@@ -8,10 +8,6 @@
 
 #pragma once
 #include "SDL/SDL.h"
-#include <vector>
-#include <string>
-
-using namespace std;
 
 // Vector2 struct just stores x/y coordinates
 // (for now)
@@ -21,18 +17,6 @@ struct Vector2
 	float y;
 };
 
-typedef struct {
-	// Position of ball
-	Vector2 position;
-	// Velocity of ball
-	Vector2 velocity;
-} Ball;
-
-
-enum class GameState { StartScreen, Playing };
-
-enum class GameMode { SinglePlayer, MultiPlayer, IA };
-
 // Game class
 class Game
 {
@@ -40,6 +24,8 @@ public:
 	Game();
 	// Initialize the game
 	bool Initialize();
+	// Coloca um papel de parede bonito
+	bool loadBackground();
 	// Runs the game loop until the game is over
 	void RunLoop();
 	// Shutdown the game
@@ -52,28 +38,30 @@ private:
 
 	// Window created by SDL
 	SDL_Window* mWindow;
+
+	//The surface contained by the window
+	SDL_Surface* gScreenSurface = NULL;
+
+	//The image we will load and show on the screen
+	SDL_Surface* gHelloWorld = NULL;
+	
 	// Renderer for 2D drawing
 	SDL_Renderer* mRenderer;
+
+	SDL_Texture* texture1;
+
 	// Number of ticks since start of game
 	Uint32 mTicksCount;
 	// Game should continue to run
 	bool mIsRunning;
-	// Game state
-	GameState mGameState;
-	// Game mode
-	GameMode mGameMode;
-
-
+	
 	// Pong specific
 	// Direction of paddle
 	int mPaddleDir;
 	// Position of paddle
 	Vector2 mPaddlePos;
-
-	// Balls list
-	vector<Ball> mBalls;
-
-	int playerBoard;
-
-
+	// Position of ball
+	Vector2 mBallPos;
+	// Velocity of ball
+	Vector2 mBallVel;
 };
