@@ -12,13 +12,10 @@ int main(int argc, char** argv)
 {
 	Game game;
 	bool success = game.Initialize();
-	bool menu = game.loadBackground();
 
-	if (menu) {
-		if (success)
-		{
-			game.RunLoop();
-		}
+	if (success)
+	{
+		game.RunLoop();
 	}
 
 	
