@@ -14,7 +14,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/antuniooh/Relic">
-    <img src="https://github.com/henriquevital00/pong-game/blob/main/Images/Logo.png" alt="Logo" width="550">
+    <img src="https://raw.githubusercontent.com/henriquevital00/pong-game/main/menu.bmp" alt="Logo" width="550">
   </a>
 </p>
 
