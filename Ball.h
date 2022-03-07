@@ -2,6 +2,7 @@
 
 #include "SDL/SDL.h"
 #include "Utils.h"
+#include "Paddle.h"
 
 
 class Ball
@@ -16,6 +17,8 @@ public:
 		Vector4 color = Vector4(255, 255, 0, 255)
 	);
 	void Draw(SDL_Renderer* renderer);
+	bool DidColideWithFirstPaddle(Paddle* paddle);
+	bool DidColideWithSecondPaddle(Paddle* paddle);
 
 
 	Vector2 position;
@@ -25,4 +28,12 @@ public:
 	Vector2 acceleration;
 
 	Vector4 color;
+
+	bool isTouchingPaddle[2] = {false, false};
+
+	Uint32 start = 0;
+	Uint32 end = 0;
+
+	Vector2 topLeft;
+	Vector2 bottomRight;
 };

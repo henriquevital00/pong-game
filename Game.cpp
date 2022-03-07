@@ -50,6 +50,9 @@ bool Game::Initialize()
 	windowWidth = &displayMode.w;
 	windowHeight = &displayMode.h;
 
+	*windowWidth = *windowWidth / 2.f;
+	*windowHeight = *windowHeight / 2.f;
+
 	SDL_Log("Window size: %d x %d", *windowWidth, *windowHeight);
 
 	SDL_Log("Creating window...");
@@ -59,7 +62,7 @@ bool Game::Initialize()
 		SDL_WINDOWPOS_CENTERED,
 		*windowWidth,	
 		*windowHeight,
-		SDL_WINDOW_MAXIMIZED
+		NULL
 	);
 
 	if (!window)
@@ -70,8 +73,8 @@ bool Game::Initialize()
 
 	SDL_Log("Creating renderer...");
 	renderer = SDL_CreateRenderer(
-		window, // Window to create renderer for
-		-1,		 // Usually -1
+		window, 
+		-1,		
 		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
 	);
 
@@ -86,16 +89,19 @@ bool Game::Initialize()
 	SDL_Log("Loading background...");
 	Game::LoadBackground();
 
-	Vector2 paddlePos = Vector2(10.0f, *windowHeight / 2.0f);
-	paddle = Paddle(paddlePos);
+	float paddleWidth = 15.0f;
+	float paddleMargin = 20.0f;
+	firstPaddle = Paddle(Vector2(paddleMargin, *windowHeight / 2.0f));
+	secondPaddle = Paddle(Vector2(*windowWidth - (paddleMargin + paddleWidth) , *windowHeight / 2.0f));
 
-	Vector2 ballPos = Vector2(1000.f, 540.f);
+	Vector2 ballPos = Vector2(*windowWidth/2.f,* windowHeight/2.f);
 	Vector2 ballVel = Vector2(-200.f, 500.f);
 	balls.push_back(Ball());
 	balls[0].position = ballPos;
 	balls[0].velocity = ballVel;
 
 	startTiming = SDL_GetTicks();
+
 	return true;
 }
 
@@ -163,6 +169,79 @@ void Game::RunLoop()
 	}
 }
 
+void Game::ProcessMenuInput(const Uint8* keyboardState)
+{
+	if (keyboardState[SDL_SCANCODE_1] || keyboardState[SDL_SCANCODE_KP_1])
+	{
+		gameMode = GameMode::SinglePlayer;
+		gameState = GameState::Playing;
+	}
+	else if (keyboardState[SDL_SCANCODE_2] || keyboardState[SDL_SCANCODE_KP_2])
+	{
+		gameMode = GameMode::MultiPlayer;
+		gameState = GameState::Playing;
+	}
+	else if (keyboardState[SDL_SCANCODE_3] || keyboardState[SDL_SCANCODE_KP_3])
+	{
+		gameMode = GameMode::IA;
+		gameState = GameState::Playing;
+	}
+}
+
+void Game::ProcessSingleplayerInput(const Uint8* keyboardState)
+{
+	firstPaddle.direction.y = 0;
+
+	if (keyboardState[SDL_SCANCODE_W])
+	{
+		firstPaddle.direction.y -= 1;
+	}
+	if (keyboardState[SDL_SCANCODE_S])
+	{
+		firstPaddle.direction.y += 1;
+	}
+}
+
+void Game::ProcessBotInput(const Uint8* keyboardState)
+{
+	firstPaddle.direction.y = 0;
+
+	if (keyboardState[SDL_SCANCODE_W])
+	{
+		firstPaddle.direction.y -= 1;
+	}
+	if (keyboardState[SDL_SCANCODE_S])
+	{
+		firstPaddle.direction.y += 1;
+	}
+}
+
+void Game::ProcessMultiplayerInput(const Uint8* keyboardState)
+{
+	firstPaddle.direction.y = 0;
+	secondPaddle.direction.y = 0;
+
+	if (keyboardState[SDL_SCANCODE_W])
+	{
+		firstPaddle.direction.y -= 1;
+	}
+	if (keyboardState[SDL_SCANCODE_S])
+	{
+		firstPaddle.direction.y += 1;
+	}
+
+	if (keyboardState[SDL_SCANCODE_UP])
+	{
+		secondPaddle.direction.y -= 1;
+	}
+	if (keyboardState[SDL_SCANCODE_DOWN])
+	{
+		secondPaddle.direction.y += 1;
+	}
+
+
+}
+
 void Game::ProcessInput()
 {
 	SDL_Event event;
@@ -176,228 +255,221 @@ void Game::ProcessInput()
 		}
 	}
 
-	// Get state of keyboard - podemos buscar por alguma tecla específica pressionada no teclado, nesse caso, Escape
 	const Uint8* state = SDL_GetKeyboardState(NULL);
-	// If escape is pressed, also end loop
+	
 	if (state[SDL_SCANCODE_ESCAPE])
 	{
 		isRunning = false;
 	}
 
-
-	// Game screen
 	if (gameState == GameState::StartScreen) 
 	{
-		if (state[SDL_SCANCODE_1] || state[SDL_SCANCODE_KP_1])
+		ProcessMenuInput(state);
+	}
+	else if (gameState == GameState::Playing)
+	{
+		if (gameMode == GameMode::SinglePlayer)
 		{
-			gameMode = GameMode::SinglePlayer;
-			gameState = GameState::Playing;
+			ProcessSingleplayerInput(state);
 		}
-		if (state[SDL_SCANCODE_2] || state[SDL_SCANCODE_KP_2])
+		else if (gameMode == GameMode::MultiPlayer)
 		{
-			gameMode = GameMode::MultiPlayer;
-			gameState = GameState::Playing;
+			ProcessMultiplayerInput(state);
 		}
-		if (state[SDL_SCANCODE_2] || state[SDL_SCANCODE_KP_3])
+		else if (gameMode == GameMode::IA)
 		{
-			gameMode = GameMode::IA;
-			gameState = GameState::Playing;
+			ProcessBotInput(state);
 		}
 	}
-	else
+}
+
+void Game::UpdatePaddle(Paddle* paddle, float deltaTime)
+{
+	if (paddle->direction.y != 0)
 	{
-		// Update paddle direction based on W/S keys - atualize a direção da raquete com base na entrada do jogador
-		// W -> move a raquete para cima, S -> move a raquete para baixo
-		paddle.direction.y = 0;
-		if (state[SDL_SCANCODE_W])
+		paddle->position.y += paddle->direction.y * paddle->speed * paddle->speedFactor * deltaTime;
+		
+		if (paddle->position.y < (paddle->height / 2.0f + paddle->width))
 		{
-			paddle.direction.y -= 1;
+			paddle->position.y = paddle->height / 2.0f + paddle->width;
 		}
-		if (state[SDL_SCANCODE_S])
+		else if (paddle->position.y > (*windowHeight - paddle->height / 2.0f - paddle->width))
 		{
-			paddle.direction.y += 1;
+			paddle->position.y = *windowHeight - paddle->height / 2.0f - paddle->width;
 		}
+	}
+}
+
+void Game::UpdateScoreBoard()
+{
+	string newTitle = "Placar: " + to_string(++playerBoard);
+	SDL_SetWindowTitle(window, newTitle.c_str());
+}
+
+void Game::AddNewBall(Vector2 velocity)
+{
+	const float distanceFromCollidedBall = 10.0f;
+	const float velocityIncreaseFactor = 15.0f;
+
+	Ball newBall = Ball(Vector2(
+		*windowWidth / 2.f,
+		*windowHeight / 2.f
+	));
+
+	newBall.velocity = velocity;
+
+	balls.push_back(newBall);
+}
+
+void Game::CheckBallCollisionWithWalls(Ball* ball)
+{
+	if (ball->position.x <= 0.0f)
+	{
+		SDL_Log("ball position less than 0.0f: (%.2f, %.2f)", ball->position.x, ball->position.y);
+		isRunning = false;
+		ball->velocity.x *= -1.0f;
+	}
+
+	if (gameMode == GameMode::MultiPlayer) {
+		if (ball->position.x >= *windowWidth)
+		{
+			isRunning = false;
+			ball->velocity.x *= -1.0f;
+		}
+		
+	}
+	else if (gameMode == GameMode::SinglePlayer) {
+		if (ball->position.x >= (*windowWidth - firstPaddle.width) && ball->velocity.x > 0.0f)
+		{
+			ball->velocity.x *= -1.0f;
+		}
+	}
+
+	if (ball->position.y <= firstPaddle.width && ball->velocity.y < 0.0f)
+	{
+		ball->velocity.y *= -1;
+	}
+
+	else if (
+		ball->position.y >= (*windowHeight - firstPaddle.width)
+		&& ball->velocity.y > 0.0f
+	) {
+		ball->velocity.y *= -1;
 	}
 }
 
 void Game::UpdateGame()
 {
-	// Espere que 16ms tenham passado desde o último frame - limitando os frames
-	while (!SDL_TICKS_PASSED(SDL_GetTicks(), ticksCount + 16))
-		;
+	while (!SDL_TICKS_PASSED(SDL_GetTicks(), ticksCount + 16));
 
-	// Delta time é a diferença em ticks do último frame
-	// (convertido pra segundos) - calcula o delta time para atualização do jogo
 	float deltaTime = (SDL_GetTicks() - ticksCount) / 1000.0f;
 
-	// "Clamp" (lima/limita) valor máximo de delta time
-	if (deltaTime > 0.05f)
-	{
+	if (deltaTime > 0.05f) {
 		deltaTime = 0.05f;
 	}
 
-	// atualize a contagem de ticks par ao próximo frame
 	ticksCount = SDL_GetTicks();
 
-	// atualiza a posição da raquete
-	if (paddle.direction.y != 0)
-	{
-		paddle.position.y += paddle.direction.y * paddle.speed * paddle.speedFactor * deltaTime;
-		// verifique que a raquete não se move para fora da tela - usamos "paddle.width", que definimos como a altura dos elementos
-		if (paddle.position.y < (paddle.height / 2.0f + paddle.width))
-		{
-			paddle.position.y = paddle.height / 2.0f + paddle.width;
-		}
-		else if (paddle.position.y > (*windowHeight - paddle.height / 2.0f - paddle.width))
-		{
-			paddle.position.y = *windowHeight - paddle.height / 2.0f - paddle.width;
-		}
-	}
-
-	endTiming = SDL_GetTicks();
+	endTiming = ticksCount;
 	secondsElapsed = (endTiming - startTiming) / 1000.f;
 
-	for (auto& ball : balls) {
-		// atualiza a posição da bola com base na sua velocidade
-		ball.position.x += ball.velocity.x * ball.speed * deltaTime;
-		ball.position.y += ball.velocity.y * ball.speed * deltaTime;
+	bool shouldAddNewBall = false;
+	Vector2 newBallVelocity = Vector2::Zero();
 
-		// atualiza a posição da bola se ela colidiu com a raquete
-		float diff = paddle.position.y - ball.position.y;
-		//pegue o valor absoluto de diferença entre o eixo y da bolinha e da raquete
-		//isso é necessário para os casos em que no próximo frame a bolinha ainda não esteja tão distante da raquete
-		//verifica se a bola está na area da raquete e na mesma posição no eixo x
-		diff = (diff > 0.0f) ? diff : -diff;
-		if (
-			// A diferença no eixo y y-difference is small enough
-			diff <= paddle.height / 2.0f &&
-			// Estamos na posicao x correta
-			ball.position.x <= 25.0f && ball.position.x >= 20.0f &&
-			// A bolinha está se movendo para a esquerda
-			ball.velocity.x < 0.0f)
-		{
-			ball.velocity.x *= -1.0f;
+	if (gameMode == GameMode::SinglePlayer) {
+		UpdatePaddle(&firstPaddle, deltaTime);
 
-			#pragma region score_board
-			string newTitle = "Placar: " + to_string(++playerBoard);
-			SDL_SetWindowTitle(window, newTitle.c_str());
-			#pragma endregion controls score board
+		for (auto& ball : balls) {
+			ball.position.x += ball.velocity.x * ball.speed * deltaTime;
+			ball.position.y += ball.velocity.y * ball.speed * deltaTime;
 
-			#pragma region add_new_ball
+			if (ball.DidColideWithFirstPaddle(&firstPaddle)) {
+				ball.velocity.x *= -1.0f;
+				UpdateScoreBoard();
 
-			if (playerBoard % 1 == 0)
-			{
-				const float distanceFromCollidedBall = 10.0f;
-				const float velocityIncreaseFactor = 15.0f;
-
-				Ball newBall = Ball();
-
-				newBall.position = Vector2(
-					paddle.position.x + paddle.width + distanceFromCollidedBall,
-					ball.position.y + paddle.width + distanceFromCollidedBall
-				);
-
-				newBall.velocity = Vector2(
-					ball.velocity.x,
-					-(ball.velocity.y + velocityIncreaseFactor)
-				);
-
-				balls.push_back(newBall);
+				if (playerBoard % 3 == 0)
+				{
+					shouldAddNewBall = true;
+					newBallVelocity = Vector2(-200.0f, -ball.velocity.y);
+				}
 			}
 
-			#pragma endregion add new ball on increase 3 points
+			CheckBallCollisionWithWalls(&ball);
+
+			/*for (auto& mBallAux : balls) {
+				if (ball.position.x < mBallAux.position.x + paddle.width &&
+					ball.position.x + paddle.width > mBallAux.position.x &&
+					ball.position.y < mBallAux.position.y + paddle.width &&
+					ball.position.y + paddle.width > mBallAux.position.y
+					)
+				{
+					ball.velocity.x *= -1;
+					mBallAux.velocity.x *= -1;
+				}
+			}*/
+
+			if ((int)(secondsElapsed) % 10 == 0) {
+				ball.speed += 0.005f;
+			}
 		}
 
-		//Verifica se a bola saiu da tela (no lado esquerdo, onde é permitido)
-		//Se sim, encerra o jogo
-		// 
-		else if (ball.position.x <= 0.0f)
-		{
-			isRunning = false;
-			ball.velocity.x *= -1.0f;
+		if (shouldAddNewBall) {
+			AddNewBall(newBallVelocity);
+			shouldAddNewBall = false;
 		}
+	}
+	else if (gameMode == GameMode::MultiPlayer) {
+		UpdatePaddle(&firstPaddle, deltaTime);
+		UpdatePaddle(&secondPaddle, deltaTime);
 
-		// Atualize (negative) a velocidade da bola se ela colidir com a parede do lado direito
-		// 
-		else if (ball.position.x >= (*windowWidth - paddle.width) && ball.velocity.x > 0.0f)
-		{
-			ball.velocity.x *= -1.0f;
-		}
+		for (auto& ball : balls) {
+			ball.position.x += ball.velocity.x * ball.speed * deltaTime;
+			ball.position.y += ball.velocity.y * ball.speed * deltaTime;
 
-		// Atualize (negative) a posição da bola se ela colidir com a parede de cima
-		// 
-		if (ball.position.y <= paddle.width && ball.velocity.y < 0.0f)
-		{
-			ball.velocity.y *= -1;
-		}
-
-		// Atualize (negative) a posição da bola se ela colidiu com a parede de baixo
-		// Did the ball collide with the bottom wall?
-		else if (
-			ball.position.y >= (*windowHeight - paddle.width) 
-			&& ball.velocity.y > 0.0f
-		){
-			ball.velocity.y *= -1;
-		}
-
-		// verifica se houve colisão com outras bolas e faz as bolas irem para direções opostas
-		/*for (auto& mBallAux : balls) {
-			if (ball.position.x < mBallAux.position.x + paddle.width &&
-				ball.position.x + paddle.width > mBallAux.position.x &&
-				ball.position.y < mBallAux.position.y + paddle.width &&
-				ball.position.y + paddle.width > mBallAux.position.y
-				)
-			{
+			if (ball.DidColideWithFirstPaddle(&firstPaddle) || ball.DidColideWithSecondPaddle(&secondPaddle)) {
 				ball.velocity.x *= -1;
-				mBallAux.velocity.x *= -1;
+				ball.speed += 0.01f;
 			}
-		}*/
 
-		if ((int)(secondsElapsed) % 10 == 0) {
-			ball.speed += 0.005f;
+			CheckBallCollisionWithWalls(&ball);
+		}
+	}
+	else if (gameMode == GameMode::IA) {
+		UpdatePaddle(&firstPaddle, deltaTime);
+
+		for (auto& ball : balls) {
+			ball.position.x += ball.velocity.x * ball.speed * deltaTime;
+			ball.position.y += ball.velocity.y * ball.speed * deltaTime;
+
+			secondPaddle.position.y = ball.position.y;
+
+			if (ball.DidColideWithFirstPaddle(&firstPaddle) || ball.DidColideWithSecondPaddle(&secondPaddle)) {
+				ball.velocity.x *= -1;
+				ball.speed += 0.01f;
+			}
+
+			CheckBallCollisionWithWalls(&ball);
 		}
 	}
 
 }
 
-//Desenhando a tela do jogo
 void Game::GenerateOutput()
 {
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
 	SDL_RenderClear(renderer);
-	SDL_RenderCopy(renderer, fieldTexture, NULL, NULL);
 
-	// Desenha as paredes - mudamos a cor de renderer para o desenho dos retangulos que formaram as paredes
-	SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
-
-	// Desenha a parede de cima - desenhando um retangulo no topo da tela, coordenada x e y = 0, 0 representa o topo esquerdo
-	//primeiro definimos as coordenadas e tamanhos do triangulo
-	SDL_Rect wall{
-		0,			// Top left x
-		0,			// Top left y
-		*windowWidth,		// Width
-		paddle.width	// Height
-	};
-	SDL_RenderFillRect(renderer, &wall);//finalmente, desenhamos um retangulo no topo
-
-	SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-
-	//desenhamos as outras paredes apenas mudando as coordenadas de wall
-
-	// parede de baixo
-	wall.y = *windowHeight - paddle.width;
-	SDL_RenderFillRect(renderer, &wall);
-
-	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-
-	// parede da direita
-	wall.x = *windowWidth - paddle.width;
-	wall.y = 0;
-	wall.w = *windowWidth;
-	wall.h = paddle.width;
-	SDL_RenderFillRect(renderer, &wall);
-
-	paddle.Draw(renderer);
+	if (gameMode == GameMode::SinglePlayer) {
+		firstPaddle.Draw(renderer);
+	}
+	else if (gameMode == GameMode::MultiPlayer) {
+		firstPaddle.Draw(renderer);
+		secondPaddle.Draw(renderer);
+	}
+	else if (gameMode == GameMode::IA) {
+		firstPaddle.Draw(renderer);
+		secondPaddle.Draw(renderer);
+	}
 
 	for (auto& ball : balls) {
 		ball.Draw(renderer);

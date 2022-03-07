@@ -26,4 +26,6 @@ public:
 
 	float speedFactor = 2;
 
+	Vector2 topLeft;
+	Vector2 bottomRight;
 };

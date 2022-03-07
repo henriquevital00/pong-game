@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <math.h>
 
 using namespace std;
 
@@ -34,4 +35,10 @@ public:
 	float y;
 	float w;
 	float z;
+};
+
+class Utils {
+public:
+	static float EuclidianDistance(Vector2 p1, Vector2 p2);
+	static bool RectangleIntersection(Vector2 tl1, Vector2 br1, Vector2 tl2, Vector2 br2);
 };

@@ -15,6 +15,15 @@ Paddle::Paddle(
 	direction(direction),
 	color(color)
 {
+	topLeft = Vector2(
+		position.x,
+		position.y - height/2.f
+	);
+
+	bottomRight = Vector2(
+		position.x + width,
+		position.y + height / 2.f
+	);
 }
 
 void Paddle::Draw(SDL_Renderer* renderer) {

@@ -43,6 +43,14 @@ private:
 		SDL_Rect* screenDest,
 		SDL_Renderer* renderer
 	);
+	void ProcessMenuInput(const Uint8* keyboardState);
+	void ProcessBotInput(const Uint8* keyboardState);
+	void ProcessMultiplayerInput(const Uint8* keyboardState);
+	void ProcessSingleplayerInput(const Uint8* keyboardState);
+	void UpdatePaddle(Paddle* paddle, float deltaTime);
+	void UpdateScoreBoard();
+	void AddNewBall(Vector2 velocity = Vector2(-200.f, 500.f));
+	void CheckBallCollisionWithWalls(Ball* ball);
 
 	SDL_Window* window;
 
@@ -63,7 +71,8 @@ private:
 	GameMode gameMode;
 
 
-	Paddle paddle;
+	Paddle firstPaddle;
+	Paddle secondPaddle;
 	vector<Ball> balls;
 	int playerBoard;
 
