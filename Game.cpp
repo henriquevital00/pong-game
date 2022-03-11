@@ -136,9 +136,6 @@ void Game::LoadBackground()
 	SDL_Log("Loading %s...", menuBitmapName.c_str());
 	LoadBitmap(menuBitmapName, menuSurface, menuTexture, &screenDest, renderer);
 
-	SDL_Log("Loading %s...", fieldBitmapName.c_str());
-	LoadBitmap(fieldBitmapName, fieldSurface, fieldTexture, &screenDest, renderer);
-
 	SDL_RenderCopy(renderer, menuTexture, NULL, NULL);
 	SDL_RenderPresent(renderer);
 
@@ -495,6 +492,7 @@ void Game::GenerateOutput()
 
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
 	SDL_RenderClear(renderer);
+	SDL_RenderCopy(renderer, texture, NULL, NULL);
 
 	if (gameMode == GameMode::None) {
 		return;
