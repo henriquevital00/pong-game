@@ -21,7 +21,7 @@ using namespace std;
 
 enum class GameState { StartScreen, Playing };
 
-enum class GameMode { SinglePlayer, MultiPlayer, IA };
+enum class GameMode { SinglePlayer, MultiPlayer, IA, None };
 
 
 class Game
@@ -48,9 +48,11 @@ private:
 	void ProcessMultiplayerInput(const Uint8* keyboardState);
 	void ProcessSingleplayerInput(const Uint8* keyboardState);
 	void UpdatePaddle(Paddle* paddle, float deltaTime);
-	void UpdateScoreBoard();
+	void UpdateScoreBoard(int firstPlayerScore, int secondPlayerScore = -1);
 	void AddNewBall(Vector2 velocity = Vector2(-200.f, 500.f));
 	void CheckBallCollisionWithWalls(Ball* ball);
+	void ResetGame();
+	void InitializeVariables();
 
 	SDL_Window* window;
 
@@ -74,7 +76,7 @@ private:
 	Paddle firstPaddle;
 	Paddle secondPaddle;
 	vector<Ball> balls;
-	int playerBoard;
+	int firstPlayerScore, secondPlayerScore;
 
 	std::string menuBitmapName;
 	std::string fieldBitmapName;

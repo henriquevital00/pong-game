@@ -19,7 +19,7 @@ Game::Game()
 	, renderer(nullptr)
 	, ticksCount(0)
 	, isRunning(true)
-	, playerBoard(0)
+	, firstPlayerScore(0)
 	, gameState(GameState::StartScreen)
 	, menuBitmapName("menu.bmp")
 	, fieldBitmapName("campo.bmp")
@@ -89,18 +89,7 @@ bool Game::Initialize()
 	SDL_Log("Loading background...");
 	Game::LoadBackground();
 
-	float paddleWidth = 15.0f;
-	float paddleMargin = 20.0f;
-	firstPaddle = Paddle(Vector2(paddleMargin, *windowHeight / 2.0f));
-	secondPaddle = Paddle(Vector2(*windowWidth - (paddleMargin + paddleWidth) , *windowHeight / 2.0f));
-
-	Vector2 ballPos = Vector2(*windowWidth/2.f,* windowHeight/2.f);
-	Vector2 ballVel = Vector2(-200.f, 500.f);
-	balls.push_back(Ball());
-	balls[0].position = ballPos;
-	balls[0].velocity = ballVel;
-
-	startTiming = SDL_GetTicks();
+	Game::InitializeVariables();
 
 	return true;
 }
@@ -300,9 +289,14 @@ void Game::UpdatePaddle(Paddle* paddle, float deltaTime)
 	}
 }
 
-void Game::UpdateScoreBoard()
+void Game::UpdateScoreBoard(int firstPlayerScore, int secondPlayerScore)
 {
-	string newTitle = "Placar: " + to_string(++playerBoard);
+	string newTitle = "Jogador 01: " + to_string(firstPlayerScore);
+
+	if (secondPlayerScore != -1) {
+		newTitle += " | Jogador 02: " + to_string(secondPlayerScore);
+	}
+
 	SDL_SetWindowTitle(window, newTitle.c_str());
 }
 
@@ -321,22 +315,52 @@ void Game::AddNewBall(Vector2 velocity)
 	balls.push_back(newBall);
 }
 
+void Game::InitializeVariables() {
+	float paddleWidth = 15.0f;
+	float paddleMargin = 20.0f;
+	firstPaddle = Paddle(Vector2(paddleMargin, *windowHeight / 2.0f));
+	secondPaddle = Paddle(Vector2(*windowWidth - (paddleMargin + paddleWidth), *windowHeight / 2.0f));
+
+	Vector2 ballPos = Vector2(*windowWidth / 2.f, *windowHeight / 2.f);
+	Vector2 ballVel = Vector2(-200.f, 500.f);
+	balls = vector<Ball>();
+	balls.push_back(Ball());
+	balls[0].position = ballPos;
+	balls[0].velocity = ballVel;
+
+	startTiming = SDL_GetTicks();
+
+	firstPlayerScore = 0;
+	secondPlayerScore = 0;
+
+	SDL_SetWindowTitle(window, "P.O.N.G");
+}
+
+void Game::ResetGame() 
+{
+	gameState = GameState::StartScreen;
+	gameMode = GameMode::None;
+	InitializeVariables();
+	Game::LoadBackground();
+}
+
 void Game::CheckBallCollisionWithWalls(Ball* ball)
 {
 	if (ball->position.x <= 0.0f)
 	{
 		SDL_Log("ball position less than 0.0f: (%.2f, %.2f)", ball->position.x, ball->position.y);
-		isRunning = false;
+		//isRunning = false;
+		secondPlayerScore += 1;
 		ball->velocity.x *= -1.0f;
 	}
 
 	if (gameMode == GameMode::MultiPlayer) {
 		if (ball->position.x >= *windowWidth)
 		{
-			isRunning = false;
+			//isRunning = false;
+			firstPlayerScore += 1;
 			ball->velocity.x *= -1.0f;
 		}
-		
 	}
 	else if (gameMode == GameMode::SinglePlayer) {
 		if (ball->position.x >= (*windowWidth - firstPaddle.width) && ball->velocity.x > 0.0f)
@@ -373,6 +397,11 @@ void Game::UpdateGame()
 	endTiming = ticksCount;
 	secondsElapsed = (endTiming - startTiming) / 1000.f;
 
+	if ((firstPlayerScore % 3 == 0 && firstPlayerScore != 0) 
+		|| (secondPlayerScore % 3 == 0 && secondPlayerScore != 0)) {
+		ResetGame();
+	}
+
 	bool shouldAddNewBall = false;
 	Vector2 newBallVelocity = Vector2::Zero();
 
@@ -385,9 +414,10 @@ void Game::UpdateGame()
 
 			if (ball.DidColideWithFirstPaddle(&firstPaddle)) {
 				ball.velocity.x *= -1.0f;
-				UpdateScoreBoard();
+				firstPlayerScore += 1;
+				UpdateScoreBoard(firstPlayerScore);
 
-				if (playerBoard % 3 == 0)
+				if (firstPlayerScore % 3 == 0)
 				{
 					shouldAddNewBall = true;
 					newBallVelocity = Vector2(-200.0f, -ball.velocity.y);
@@ -432,6 +462,8 @@ void Game::UpdateGame()
 			}
 
 			CheckBallCollisionWithWalls(&ball);
+
+			UpdateScoreBoard(firstPlayerScore, secondPlayerScore);
 		}
 	}
 	else if (gameMode == GameMode::IA) {
@@ -456,8 +488,17 @@ void Game::UpdateGame()
 
 void Game::GenerateOutput()
 {
+	SDL_Surface* surface = SDL_LoadBMP("campo.bmp");
+	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+	SDL_FreeSurface(surface);
+
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
 	SDL_RenderClear(renderer);
+
+	if (gameMode == GameMode::None) {
+		return;
+	}
 
 	if (gameMode == GameMode::SinglePlayer) {
 		firstPaddle.Draw(renderer);
