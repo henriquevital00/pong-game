@@ -17,29 +17,29 @@ Paddle::Paddle(
 {
 	topLeft = Vector2(
 		position.x,
-		position.y - height/2.f
+		position.y
 	);
 
 	bottomRight = Vector2(
 		position.x + width,
-		position.y + height / 2.f
+		position.y + height
 	);
 }
 
 void Paddle::Draw(SDL_Renderer* renderer) {
 	SDL_SetRenderDrawColor(
 		renderer,
-		this->color.x,
-		this->color.y,
-		this->color.w,
-		this->color.z
+		color.x,
+		color.y,
+		color.w,
+		color.z
 	);
 
 	SDL_Rect paddle{
-		static_cast<int>(this->position.x),//static_cast converte de float para inteiros, pois SDL_Rect trabalha com inteiros
-		static_cast<int>(this->position.y - this->height / 2),
-		this->width,
-		static_cast<int>(this->height)
+		static_cast<int>(position.x),
+		static_cast<int>(position.y),
+		static_cast<int>(width),
+		static_cast<int>(height)
 	};
 
 	SDL_RenderFillRect(renderer, &paddle);

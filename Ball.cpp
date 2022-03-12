@@ -1,5 +1,4 @@
 #include "Ball.h"
-#include <math.h>
 
 Ball::Ball(
 	Vector2 position,
@@ -17,71 +16,98 @@ Ball::Ball(
 	color(color)
 {
 	topLeft = Vector2(
-		position.x - radius / 2.f,
-		position.y - radius / 2.f
+		position.x,
+		position.y
 	);
 
 	bottomRight = Vector2(
-		position.x + radius / 2.f,
-		position.y + radius / 2.f
+		position.x + radius,
+		position.y + radius
 	);
 }
 
 void Ball::Draw(SDL_Renderer* renderer) {
 	SDL_SetRenderDrawColor(
 		renderer,
-		this->color.x,
-		this->color.y,
-		this->color.w,
-		this->color.z
+		color.x,
+		color.y,
+		color.w,
+		color.z
 	);
 
 	SDL_Rect ball{
-		static_cast<int>(this->position.x - this->radius / 2),
-		static_cast<int>(this->position.y - this->radius / 2),
-		this->radius,
-		this->radius
+		static_cast<int>(position.x),
+		static_cast<int>(position.y),
+		radius,
+		radius
 	};
+
 
 	SDL_RenderFillRect(renderer, &ball);
 }
 
-bool Ball::DidColideWithFirstPaddle(Paddle* paddle)
+bool Ball::DidCollideWithPaddle(Paddle* paddle)
 {
-	float diffY = abs(paddle->position.y - position.y);
+	const bool hasCollided = position.x <= paddle->position.x + paddle->width &&
+		position.x + radius >= paddle->position.x &&
+		position.y <= paddle->position.y + paddle->height &&
+		position.y + radius >= paddle->position.y;
 
-	float distance = Utils::EuclidianDistance(paddle->position, position);
+	if (hasCollided)
+		SDL_Log("Colidiu com raquete");
 
-	if (
-		diffY <= paddle->height / 2.0f
-		&& distance <= radius + paddle->width
-		&& velocity.x < 0.0f
-	) {
-
-		SDL_Log("Ball collided with paddle");
-		return true;
-	}
-
-
-	return false;
+	return hasCollided;
 }
 
-bool Ball::DidColideWithSecondPaddle(Paddle* paddle)
+void Ball::InvertVelocityOnPaddleCollide(Paddle* paddle, bool hasToUpdateSpeed)
 {
-	float diffY = abs(paddle->position.y - position.y);
-
-	float distance = Utils::EuclidianDistance(paddle->position, position);
-
-	if (
-		diffY <= paddle->height / 2.0f
-		&& distance <= radius/2.f + paddle->width/2.f
-		&& velocity.x > 0.0f
-		) {
-
-		SDL_Log("Ball collided with paddle");
-		return true;
+	if (hasToUpdateSpeed)
+	{
+		speed += 0.01f;
 	}
 
+	velocity.x *= -1;
+	
+	#pragma region vertical collision 
+	float topPositionBeforeCollide = (position.y + radius) - velocity.y;
+	float bottomPositionBeforeCollide = position.y - velocity.y;
 
-	return false;
+	bool isTopCollision = topPositionBeforeCollide < paddle->position.y;
+	bool isBottomCollision = bottomPositionBeforeCollide > paddle->position.y + paddle->height;
+
+	if (isTopCollision || isBottomCollision)
+	{
+		velocity.y *= -1;
+	}
+	# pragma endregion 
 }
+
+void Ball::CheckCollisionWithAnotherBall(Ball* ball)
+{
+	if (ball == this) return; // prevents compare a ball with itself
+
+	if (position.x <= ball->position.x + ball->radius &&
+		position.x + radius >= ball->position.x &&
+		position.y <= ball->position.y + ball->radius &&
+		position.y + ball->radius >= ball->position.y
+	)
+	{
+		velocity.x *= -1;
+		ball->velocity.x *= -1;
+
+		#pragma region vertical collision 
+		float topPositionBeforeCollide = (position.y + radius) - velocity.y;
+		float bottomPositionBeforeCollide = position.y - velocity.y;
+
+		bool isTopCollision = topPositionBeforeCollide < ball->position.y;
+		bool isBottomCollision = bottomPositionBeforeCollide > ball->position.y + ball->radius;
+
+		if (isTopCollision || isBottomCollision)
+		{
+			velocity.y *= -1;
+			ball->velocity.y *= -1;
+		}
+		# pragma endregion 
+	}
+}
+

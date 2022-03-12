@@ -45,3 +45,9 @@ bool Utils::RectangleIntersection(Vector2 tl1, Vector2 br1, Vector2 tl2, Vector2
         
     return true;
 }
+
+int Utils::RandNumber(int min, int max)
+{
+    srand(time(NULL));
+    return rand() % (max - min + 1) + min;
+}

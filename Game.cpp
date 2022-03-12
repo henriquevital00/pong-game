@@ -227,8 +227,6 @@ void Game::ProcessMultiplayerInput(const Uint8* keyboardState)
 	{
 		secondPaddle.direction.y += 1;
 	}
-
-
 }
 
 void Game::ProcessInput()
@@ -272,19 +270,20 @@ void Game::ProcessInput()
 	}
 }
 
+
 void Game::UpdatePaddle(Paddle* paddle, float deltaTime)
 {
 	if (paddle->direction.y != 0)
 	{
 		paddle->position.y += paddle->direction.y * paddle->speed * paddle->speedFactor * deltaTime;
 		
-		if (paddle->position.y < (paddle->height / 2.0f + paddle->width))
+		if (paddle->position.y < 0)
 		{
-			paddle->position.y = paddle->height / 2.0f + paddle->width;
+			paddle->position.y = 0;
 		}
-		else if (paddle->position.y > (*windowHeight - paddle->height / 2.0f - paddle->width))
+		else if (paddle->position.y + paddle->height > *windowHeight)
 		{
-			paddle->position.y = *windowHeight - paddle->height / 2.0f - paddle->width;
+			paddle->position.y = *windowHeight - paddle->height;
 		}
 	}
 }
@@ -302,13 +301,14 @@ void Game::UpdateScoreBoard(int firstPlayerScore, int secondPlayerScore)
 
 void Game::AddNewBall(Vector2 velocity)
 {
-	const float distanceFromCollidedBall = 10.0f;
-	const float velocityIncreaseFactor = 15.0f;
+	Ball newBall;
 
-	Ball newBall = Ball(Vector2(
-		*windowWidth / 2.f,
-		*windowHeight / 2.f
-	));
+	int randomNumber = Utils::RandNumber(2, 7);
+
+	newBall.position = Vector2(
+		*windowWidth/2 + *windowWidth/randomNumber,
+		*windowHeight/2 + *windowHeight/randomNumber
+	);
 
 	newBall.velocity = velocity;
 
@@ -397,14 +397,6 @@ void Game::UpdateGame()
 	endTiming = ticksCount;
 	secondsElapsed = (endTiming - startTiming) / 1000.f;
 
-	if ((firstPlayerScore % 3 == 0 && firstPlayerScore != 0) 
-		|| (secondPlayerScore % 3 == 0 && secondPlayerScore != 0)) {
-		ResetGame();
-	}
-
-	bool shouldAddNewBall = false;
-	Vector2 newBallVelocity = Vector2::Zero();
-
 	if (gameMode == GameMode::SinglePlayer) {
 		UpdatePaddle(&firstPaddle, deltaTime);
 
@@ -412,59 +404,57 @@ void Game::UpdateGame()
 			ball.position.x += ball.velocity.x * ball.speed * deltaTime;
 			ball.position.y += ball.velocity.y * ball.speed * deltaTime;
 
-			if (ball.DidColideWithFirstPaddle(&firstPaddle)) {
-				ball.velocity.x *= -1.0f;
-				firstPlayerScore += 1;
-				UpdateScoreBoard(firstPlayerScore);
+			if (ball.DidCollideWithPaddle(&firstPaddle)) {
+				ball.InvertVelocityOnPaddleCollide(&firstPaddle, false);
+
+				UpdateScoreBoard(++firstPlayerScore);
 
 				if (firstPlayerScore % 3 == 0)
 				{
-					shouldAddNewBall = true;
-					newBallVelocity = Vector2(-200.0f, -ball.velocity.y);
+					Vector2 newBallVelocity = Vector2(-200.0f, -ball.velocity.y);
+					AddNewBall(newBallVelocity);
 				}
 			}
 
 			CheckBallCollisionWithWalls(&ball);
 
-			/*for (auto& mBallAux : balls) {
-				if (ball.position.x < mBallAux.position.x + paddle.width &&
-					ball.position.x + paddle.width > mBallAux.position.x &&
-					ball.position.y < mBallAux.position.y + paddle.width &&
-					ball.position.y + paddle.width > mBallAux.position.y
-					)
-				{
-					ball.velocity.x *= -1;
-					mBallAux.velocity.x *= -1;
-				}
-			}*/
-
-			if ((int)(secondsElapsed) % 10 == 0) {
-				ball.speed += 0.005f;
+			for (auto& collidedBall : balls) {
+				ball.CheckCollisionWithAnotherBall(&collidedBall);
 			}
 		}
 
-		if (shouldAddNewBall) {
-			AddNewBall(newBallVelocity);
-			shouldAddNewBall = false;
-		}
 	}
 	else if (gameMode == GameMode::MultiPlayer) {
-		UpdatePaddle(&firstPaddle, deltaTime);
-		UpdatePaddle(&secondPaddle, deltaTime);
+		Paddle* paddles[] = { &firstPaddle, &secondPaddle };
 
-		for (auto& ball : balls) {
+		for (auto& ball : balls) 
+		{
 			ball.position.x += ball.velocity.x * ball.speed * deltaTime;
 			ball.position.y += ball.velocity.y * ball.speed * deltaTime;
 
-			if (ball.DidColideWithFirstPaddle(&firstPaddle) || ball.DidColideWithSecondPaddle(&secondPaddle)) {
-				ball.velocity.x *= -1;
-				ball.speed += 0.01f;
+			for (auto& paddle : paddles)
+			{
+				UpdatePaddle(paddle, deltaTime);
+
+				if (ball.DidCollideWithPaddle(paddle))
+				{
+					ball.InvertVelocityOnPaddleCollide(paddle, true);
+				}
+
+				UpdateScoreBoard(firstPlayerScore, secondPlayerScore);
+
+				bool firstPlayerWon = firstPlayerScore % 3 == 0;
+				bool secondPlayerWon = secondPlayerScore % 3 == 0;
+
+				if (firstPlayerWon || secondPlayerWon)
+				{
+					ResetGame();
+				}
 			}
 
 			CheckBallCollisionWithWalls(&ball);
-
-			UpdateScoreBoard(firstPlayerScore, secondPlayerScore);
 		}
+
 	}
 	else if (gameMode == GameMode::IA) {
 		UpdatePaddle(&firstPaddle, deltaTime);
@@ -475,7 +465,7 @@ void Game::UpdateGame()
 
 			secondPaddle.position.y = ball.position.y;
 
-			if (ball.DidColideWithFirstPaddle(&firstPaddle) || ball.DidColideWithSecondPaddle(&secondPaddle)) {
+			if (ball.DidCollideWithPaddle(&firstPaddle) || ball.DidCollideWithPaddle(&secondPaddle)) {
 				ball.velocity.x *= -1;
 				ball.speed += 0.01f;
 			}
@@ -483,17 +473,13 @@ void Game::UpdateGame()
 			CheckBallCollisionWithWalls(&ball);
 		}
 	}
-
 }
 
 void Game::GenerateOutput()
 {
-
 	if (gameMode == GameMode::None) {
 		return;
 	}
-
-	//SDL_FreeSurface(field);
 
 	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
 	SDL_RenderClear(renderer);

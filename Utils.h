@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 #include <math.h>
+#include <stdlib.h>
+#include <time.h>
 
 using namespace std;
 
@@ -41,4 +43,5 @@ class Utils {
 public:
 	static float EuclidianDistance(Vector2 p1, Vector2 p2);
 	static bool RectangleIntersection(Vector2 tl1, Vector2 br1, Vector2 tl2, Vector2 br2);
+	static int RandNumber(int min, int max);
 };

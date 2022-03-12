@@ -17,8 +17,9 @@ public:
 		Vector4 color = Vector4(255, 255, 0, 255)
 	);
 	void Draw(SDL_Renderer* renderer);
-	bool DidColideWithFirstPaddle(Paddle* paddle);
-	bool DidColideWithSecondPaddle(Paddle* paddle);
+	bool DidCollideWithPaddle(Paddle* paddle);
+	void CheckCollisionWithAnotherBall(Ball* ball);
+	void InvertVelocityOnPaddleCollide(Paddle* paddle, bool hasToUpdateSpeed);
 
 
 	Vector2 position;
