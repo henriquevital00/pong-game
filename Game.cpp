@@ -144,6 +144,9 @@ void Game::LoadBackground()
 
 void Game::RunLoop()
 {
+	fieldSurface = SDL_LoadBMP("campo.bmp");
+	fieldTexture = SDL_CreateTextureFromSurface(renderer, fieldSurface);
+
 	while (isRunning)
 	{
 		ProcessInput();
@@ -485,18 +488,16 @@ void Game::UpdateGame()
 
 void Game::GenerateOutput()
 {
-	SDL_Surface* surface = SDL_LoadBMP("campo.bmp");
-	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-
-	SDL_FreeSurface(surface);
-
-	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
-	SDL_RenderClear(renderer);
-	SDL_RenderCopy(renderer, texture, NULL, NULL);
 
 	if (gameMode == GameMode::None) {
 		return;
 	}
+
+	//SDL_FreeSurface(field);
+
+	SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
+	SDL_RenderClear(renderer);
+	SDL_RenderCopy(renderer, fieldTexture, NULL, NULL);
 
 	if (gameMode == GameMode::SinglePlayer) {
 		firstPaddle.Draw(renderer);
@@ -513,7 +514,6 @@ void Game::GenerateOutput()
 	for (auto& ball : balls) {
 		ball.Draw(renderer);
 	}
-
 	SDL_RenderPresent(renderer);
 }
 
