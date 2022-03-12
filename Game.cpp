@@ -443,8 +443,8 @@ void Game::UpdateGame()
 
 				UpdateScoreBoard(firstPlayerScore, secondPlayerScore);
 
-				bool firstPlayerWon = firstPlayerScore % 3 == 0;
-				bool secondPlayerWon = secondPlayerScore % 3 == 0;
+				bool firstPlayerWon = firstPlayerScore > 0 && firstPlayerScore % 3 == 0;
+				bool secondPlayerWon = secondPlayerScore > 0 && secondPlayerScore % 3 == 0;
 
 				if (firstPlayerWon || secondPlayerWon)
 				{
