@@ -465,9 +465,13 @@ void Game::UpdateGame()
 
 			secondPaddle.position.y = ball.position.y;
 
-			if (ball.DidCollideWithPaddle(&firstPaddle) || ball.DidCollideWithPaddle(&secondPaddle)) {
-				ball.velocity.x *= -1;
-				ball.speed += 0.01f;
+			Paddle* collidedPaddle =
+				ball.DidCollideWithPaddle(&firstPaddle) ? &firstPaddle :
+				ball.DidCollideWithPaddle(&secondPaddle) ? &secondPaddle : nullptr;
+
+			if (collidedPaddle != nullptr) 
+			{
+				ball.InvertVelocityOnPaddleCollide(collidedPaddle, true);
 			}
 
 			CheckBallCollisionWithWalls(&ball);
